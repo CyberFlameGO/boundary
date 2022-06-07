@@ -210,10 +210,14 @@ func initNameIfEmpty(name *string) error {
 }
 
 type Database struct {
-	Url                   string      `hcl:"url"`
-	MigrationUrl          string      `hcl:"migration_url"`
-	MaxOpenConnections    int         `hcl:"-"`
-	MaxOpenConnectionsRaw interface{} `hcl:"max_open_connections"`
+	Url                     string        `hcl:"url"`
+	MigrationUrl            string        `hcl:"migration_url"`
+	MaxOpenConnections      int           `hcl:"-"`
+	MaxOpenConnectionsRaw   interface{}   `hcl:"max_open_connections"`
+	MaxIdleConnections      int           `hcl:"-"`
+	MaxIdleConnectionsRaw   interface{}   `hcl:"max_idle_connections"`
+	ConnMaxIdleTime         interface{}   `hcl:"max_idle_time"`
+	ConnMaxIdleTimeDuration time.Duration `hcl:"-"`
 }
 
 type Plugins struct {
@@ -379,6 +383,36 @@ func Parse(d string) (*Config, error) {
 						reflect.TypeOf(t).String())
 				}
 			}
+			if result.Controller.Database.MaxIdleConnectionsRaw != nil {
+				switch t := result.Controller.Database.MaxIdleConnectionsRaw.(type) {
+				case string:
+					maxIdleConnectionsString, err := parseutil.ParsePath(t)
+					if err != nil {
+						return nil, fmt.Errorf("Error parsing database max idle connections: %w", err)
+					}
+					result.Controller.Database.MaxIdleConnections, err = strconv.Atoi(maxIdleConnectionsString)
+					if err != nil {
+						return nil, fmt.Errorf("Database max idle connections value is not an int: %w", err)
+					}
+				case int:
+					result.Controller.Database.MaxIdleConnections = t
+				default:
+					return nil, fmt.Errorf("Database max idle connections: unsupported type %q",
+						reflect.TypeOf(t).String())
+				}
+			} else {
+				result.Controller.Database.MaxIdleConnections = -1
+			}
+			if result.Controller.Database.ConnMaxIdleTime != "" {
+				t, err := parseutil.ParseDurationSecond(result.Controller.Database.ConnMaxIdleTime)
+				if err != nil {
+					return nil, err
+				}
+				result.Controller.Database.ConnMaxIdleTimeDuration = t
+			} else {
+				result.Controller.Database.ConnMaxIdleTimeDuration = -1
+			}
+
 		}
 	}
 

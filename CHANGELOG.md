@@ -4,7 +4,12 @@ Canonical reference for changes, improvements, and bugfixes for Boundary.
 
 ## Next
 
-### Bug Fixes
+### Deprecations/Changes
+
+* Credential Libraries: The `user_password` credential type has been renamed to 
+  `username_password` to remove any inconsistency over what the credential type is. 
+  All existing `user_password` typed credential libraries will be migrated to 
+  `username_password` ([PR](https://github.com/hashicorp/boundary/pull/2154)).
 
 ## 0.8.1 (2022/05/13)
 

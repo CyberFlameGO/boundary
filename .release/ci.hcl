@@ -10,7 +10,7 @@ project "boundary" {
     repository = "boundary"
     release_branches = [
         "main",
-        "llb-byow"
+        "irindos-llb-byow-release-testing"
     ]
   }
 }

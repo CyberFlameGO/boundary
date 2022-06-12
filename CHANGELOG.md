@@ -6,6 +6,14 @@ Canonical reference for changes, improvements, and bugfixes for Boundary.
 
 ### New and Improved
 
+* Credentials: This release introduces `static` Credential Stores, as well as the 
+  first `static` credential `username-password`. A static credential is stored within
+  the Boundary database and can be managed via the Boundary `credentials` CLI, API and SDK.
+  A static credential can be attached to targets; when a
+  session is authorized against that target, a credential will be fetched from
+  the store that is then relayed to the client. The client can then use this
+  information to make a connection.
+  [PR](https://github.com/hashicorp/boundary/pull/2174).
 * controller: Improve response time for listing sessions.
   This also creates a new periodic job that will delete terminated
   sessions after 1 hour.

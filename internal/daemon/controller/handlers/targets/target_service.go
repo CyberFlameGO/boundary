@@ -56,15 +56,9 @@ var (
 		action.Read,
 		action.Update,
 		action.Delete,
-		action.AddHostSets,
-		action.SetHostSets,
-		action.RemoveHostSets,
 		action.AddHostSources,
 		action.SetHostSources,
 		action.RemoveHostSources,
-		action.AddCredentialLibraries,
-		action.SetCredentialLibraries,
-		action.RemoveCredentialLibraries,
 		action.AddCredentialSources,
 		action.SetCredentialSources,
 		action.RemoveCredentialSources,
@@ -368,120 +362,6 @@ func (s Service) DeleteTarget(ctx context.Context, req *pbs.DeleteTargetRequest)
 	return nil, nil
 }
 
-// AddTargetHostSets implements the interface pbs.TargetServiceServer.
-func (s Service) AddTargetHostSets(ctx context.Context, req *pbs.AddTargetHostSetsRequest) (*pbs.AddTargetHostSetsResponse, error) {
-	const op = "targets.(Service).AddTargetHostSets"
-
-	if err := validateAddSetsRequest(req); err != nil {
-		return nil, err
-	}
-	authResults := s.authResult(ctx, req.GetId(), action.AddHostSets)
-	if authResults.Error != nil {
-		return nil, authResults.Error
-	}
-	t, ts, cl, err := s.addHostSourcesInRepo(ctx, req.GetId(), req.GetHostSetIds(), req.GetVersion())
-	if err != nil {
-		return nil, err
-	}
-
-	outputFields, ok := requests.OutputFields(ctx)
-	if !ok {
-		return nil, errors.New(ctx, errors.Internal, op, "no request context found")
-	}
-
-	outputOpts := make([]handlers.Option, 0, 3)
-	outputOpts = append(outputOpts, handlers.WithOutputFields(&outputFields))
-	if outputFields.Has(globals.ScopeField) {
-		outputOpts = append(outputOpts, handlers.WithScope(authResults.Scope))
-	}
-	if outputFields.Has(globals.AuthorizedActionsField) {
-		outputOpts = append(outputOpts, handlers.WithAuthorizedActions(authResults.FetchActionSetForId(ctx, t.GetPublicId(), IdActions).Strings()))
-	}
-
-	item, err := toProto(ctx, t, ts, cl, outputOpts...)
-	if err != nil {
-		return nil, err
-	}
-
-	return &pbs.AddTargetHostSetsResponse{Item: item}, nil
-}
-
-// SetTargetHostSets implements the interface pbs.TargetServiceServer.
-func (s Service) SetTargetHostSets(ctx context.Context, req *pbs.SetTargetHostSetsRequest) (*pbs.SetTargetHostSetsResponse, error) {
-	const op = "targets.(Service).SetTargetHostSets"
-
-	if err := validateSetSetsRequest(req); err != nil {
-		return nil, err
-	}
-	authResults := s.authResult(ctx, req.GetId(), action.SetHostSets)
-	if authResults.Error != nil {
-		return nil, authResults.Error
-	}
-	t, ts, cl, err := s.setHostSourcesInRepo(ctx, req.GetId(), req.GetHostSetIds(), req.GetVersion())
-	if err != nil {
-		return nil, err
-	}
-
-	outputFields, ok := requests.OutputFields(ctx)
-	if !ok {
-		return nil, errors.New(ctx, errors.Internal, op, "no request context found")
-	}
-
-	outputOpts := make([]handlers.Option, 0, 3)
-	outputOpts = append(outputOpts, handlers.WithOutputFields(&outputFields))
-	if outputFields.Has(globals.ScopeField) {
-		outputOpts = append(outputOpts, handlers.WithScope(authResults.Scope))
-	}
-	if outputFields.Has(globals.AuthorizedActionsField) {
-		outputOpts = append(outputOpts, handlers.WithAuthorizedActions(authResults.FetchActionSetForId(ctx, t.GetPublicId(), IdActions).Strings()))
-	}
-
-	item, err := toProto(ctx, t, ts, cl, outputOpts...)
-	if err != nil {
-		return nil, err
-	}
-
-	return &pbs.SetTargetHostSetsResponse{Item: item}, nil
-}
-
-// RemoveTargetHostSets implements the interface pbs.TargetServiceServer.
-func (s Service) RemoveTargetHostSets(ctx context.Context, req *pbs.RemoveTargetHostSetsRequest) (*pbs.RemoveTargetHostSetsResponse, error) {
-	const op = "targets.(Service).RemoveTargetHostSets"
-
-	if err := validateRemoveSetsRequest(req); err != nil {
-		return nil, err
-	}
-	authResults := s.authResult(ctx, req.GetId(), action.RemoveHostSets)
-	if authResults.Error != nil {
-		return nil, authResults.Error
-	}
-	t, ts, cl, err := s.removeHostSourcesInRepo(ctx, req.GetId(), req.GetHostSetIds(), req.GetVersion())
-	if err != nil {
-		return nil, err
-	}
-
-	outputFields, ok := requests.OutputFields(ctx)
-	if !ok {
-		return nil, errors.New(ctx, errors.Internal, op, "no request context found")
-	}
-
-	outputOpts := make([]handlers.Option, 0, 3)
-	outputOpts = append(outputOpts, handlers.WithOutputFields(&outputFields))
-	if outputFields.Has(globals.ScopeField) {
-		outputOpts = append(outputOpts, handlers.WithScope(authResults.Scope))
-	}
-	if outputFields.Has(globals.AuthorizedActionsField) {
-		outputOpts = append(outputOpts, handlers.WithAuthorizedActions(authResults.FetchActionSetForId(ctx, t.GetPublicId(), IdActions).Strings()))
-	}
-
-	item, err := toProto(ctx, t, ts, cl, outputOpts...)
-	if err != nil {
-		return nil, err
-	}
-
-	return &pbs.RemoveTargetHostSetsResponse{Item: item}, nil
-}
-
 // AddTargetHostSources implements the interface pbs.TargetServiceServer.
 func (s Service) AddTargetHostSources(ctx context.Context, req *pbs.AddTargetHostSourcesRequest) (*pbs.AddTargetHostSourcesResponse, error) {
 	const op = "targets.(Service).AddTargetHostSources"
@@ -489,9 +369,14 @@ func (s Service) AddTargetHostSources(ctx context.Context, req *pbs.AddTargetHos
 	if err := validateAddHostSourcesRequest(req); err != nil {
 		return nil, err
 	}
-	authResults := s.authResult(ctx, req.GetId(), action.AddHostSets)
+	authResults := s.authResult(ctx, req.GetId(), action.AddHostSources)
 	if authResults.Error != nil {
-		return nil, authResults.Error
+		// TODO AddHostSets was deprecated but grant actions were never migrated
+		// remove this check once actions have been migrated
+		authResults = s.authResult(ctx, req.GetId(), action.AddHostSets)
+		if authResults.Error != nil {
+			return nil, authResults.Error
+		}
 	}
 	t, ts, cl, err := s.addHostSourcesInRepo(ctx, req.GetId(), req.GetHostSourceIds(), req.GetVersion())
 	if err != nil {
@@ -527,9 +412,14 @@ func (s Service) SetTargetHostSources(ctx context.Context, req *pbs.SetTargetHos
 	if err := validateSetHostSourcesRequest(req); err != nil {
 		return nil, err
 	}
-	authResults := s.authResult(ctx, req.GetId(), action.SetHostSets)
+	authResults := s.authResult(ctx, req.GetId(), action.SetHostSources)
 	if authResults.Error != nil {
-		return nil, authResults.Error
+		// TODO SetHostSets was deprecated but grant actions were never migrated
+		// remove this check once actions have been migrated
+		authResults = s.authResult(ctx, req.GetId(), action.SetHostSets)
+		if authResults.Error != nil {
+			return nil, authResults.Error
+		}
 	}
 	t, ts, cl, err := s.setHostSourcesInRepo(ctx, req.GetId(), req.GetHostSourceIds(), req.GetVersion())
 	if err != nil {
@@ -560,14 +450,19 @@ func (s Service) SetTargetHostSources(ctx context.Context, req *pbs.SetTargetHos
 
 // RemoveTargetHostSources implements the interface pbs.TargetServiceServer.
 func (s Service) RemoveTargetHostSources(ctx context.Context, req *pbs.RemoveTargetHostSourcesRequest) (*pbs.RemoveTargetHostSourcesResponse, error) {
-	const op = "targets.(Service).RemoveTargetHostSets"
+	const op = "targets.(Service).RemoveTargetHostSources"
 
 	if err := validateRemoveHostSourcesRequest(req); err != nil {
 		return nil, err
 	}
-	authResults := s.authResult(ctx, req.GetId(), action.RemoveHostSets)
+	authResults := s.authResult(ctx, req.GetId(), action.RemoveHostSources)
 	if authResults.Error != nil {
-		return nil, authResults.Error
+		// TODO RemoveHostSets was deprecated but grant actions were never migrated
+		// remove this check once actions have been migrated
+		authResults = s.authResult(ctx, req.GetId(), action.RemoveHostSets)
+		if authResults.Error != nil {
+			return nil, authResults.Error
+		}
 	}
 	t, ts, cl, err := s.removeHostSourcesInRepo(ctx, req.GetId(), req.GetHostSourceIds(), req.GetVersion())
 	if err != nil {
@@ -596,120 +491,6 @@ func (s Service) RemoveTargetHostSources(ctx context.Context, req *pbs.RemoveTar
 	return &pbs.RemoveTargetHostSourcesResponse{Item: item}, nil
 }
 
-// DEPRECATED: AddTargetCredentialLibraries implements the interface pbs.TargetServiceServer.
-func (s Service) AddTargetCredentialLibraries(ctx context.Context, req *pbs.AddTargetCredentialLibrariesRequest) (*pbs.AddTargetCredentialLibrariesResponse, error) {
-	const op = "targets.(Service).AddTargetCredentialLibraries"
-
-	if err := validateAddLibrariesRequest(req); err != nil {
-		return nil, err
-	}
-	authResults := s.authResult(ctx, req.GetId(), action.AddCredentialLibraries)
-	if authResults.Error != nil {
-		return nil, authResults.Error
-	}
-	t, ts, cl, err := s.addCredentialSourcesInRepo(ctx, req.GetId(), req.GetApplicationCredentialLibraryIds(), nil, req.GetVersion())
-	if err != nil {
-		return nil, err
-	}
-
-	outputFields, ok := requests.OutputFields(ctx)
-	if !ok {
-		return nil, errors.New(ctx, errors.Internal, op, "no request context found")
-	}
-
-	outputOpts := make([]handlers.Option, 0, 3)
-	outputOpts = append(outputOpts, handlers.WithOutputFields(&outputFields))
-	if outputFields.Has(globals.ScopeField) {
-		outputOpts = append(outputOpts, handlers.WithScope(authResults.Scope))
-	}
-	if outputFields.Has(globals.AuthorizedActionsField) {
-		outputOpts = append(outputOpts, handlers.WithAuthorizedActions(authResults.FetchActionSetForId(ctx, t.GetPublicId(), IdActions).Strings()))
-	}
-
-	item, err := toProto(ctx, t, ts, cl, outputOpts...)
-	if err != nil {
-		return nil, err
-	}
-
-	return &pbs.AddTargetCredentialLibrariesResponse{Item: item}, nil
-}
-
-// DEPRECATED: SetTargetCredentialLibraries implements the interface pbs.TargetServiceServer.
-func (s Service) SetTargetCredentialLibraries(ctx context.Context, req *pbs.SetTargetCredentialLibrariesRequest) (*pbs.SetTargetCredentialLibrariesResponse, error) {
-	const op = "targets.(Service).SetTargetCredentialLibraries"
-
-	if err := validateSetLibrariesRequest(req); err != nil {
-		return nil, err
-	}
-	authResults := s.authResult(ctx, req.GetId(), action.SetCredentialLibraries)
-	if authResults.Error != nil {
-		return nil, authResults.Error
-	}
-	t, ts, cl, err := s.setCredentialSourcesInRepo(ctx, req.GetId(), req.GetApplicationCredentialLibraryIds(), nil, req.GetVersion())
-	if err != nil {
-		return nil, err
-	}
-
-	outputFields, ok := requests.OutputFields(ctx)
-	if !ok {
-		return nil, errors.New(ctx, errors.Internal, op, "no request context found")
-	}
-
-	outputOpts := make([]handlers.Option, 0, 3)
-	outputOpts = append(outputOpts, handlers.WithOutputFields(&outputFields))
-	if outputFields.Has(globals.ScopeField) {
-		outputOpts = append(outputOpts, handlers.WithScope(authResults.Scope))
-	}
-	if outputFields.Has(globals.AuthorizedActionsField) {
-		outputOpts = append(outputOpts, handlers.WithAuthorizedActions(authResults.FetchActionSetForId(ctx, t.GetPublicId(), IdActions).Strings()))
-	}
-
-	item, err := toProto(ctx, t, ts, cl, outputOpts...)
-	if err != nil {
-		return nil, err
-	}
-
-	return &pbs.SetTargetCredentialLibrariesResponse{Item: item}, nil
-}
-
-// DEPRECATED: RemoveTargetCredentialLibraries implements the interface pbs.TargetServiceServer.
-func (s Service) RemoveTargetCredentialLibraries(ctx context.Context, req *pbs.RemoveTargetCredentialLibrariesRequest) (*pbs.RemoveTargetCredentialLibrariesResponse, error) {
-	const op = "targets.(Service).RemoveTargetCredentialLibraries"
-
-	if err := validateRemoveLibrariesRequest(req); err != nil {
-		return nil, err
-	}
-	authResults := s.authResult(ctx, req.GetId(), action.RemoveCredentialLibraries)
-	if authResults.Error != nil {
-		return nil, authResults.Error
-	}
-	t, ts, cl, err := s.removeCredentialSourcesInRepo(ctx, req.GetId(), req.GetApplicationCredentialLibraryIds(), nil, req.GetVersion())
-	if err != nil {
-		return nil, err
-	}
-
-	outputFields, ok := requests.OutputFields(ctx)
-	if !ok {
-		return nil, errors.New(ctx, errors.Internal, op, "no request context found")
-	}
-
-	outputOpts := make([]handlers.Option, 0, 3)
-	outputOpts = append(outputOpts, handlers.WithOutputFields(&outputFields))
-	if outputFields.Has(globals.ScopeField) {
-		outputOpts = append(outputOpts, handlers.WithScope(authResults.Scope))
-	}
-	if outputFields.Has(globals.AuthorizedActionsField) {
-		outputOpts = append(outputOpts, handlers.WithAuthorizedActions(authResults.FetchActionSetForId(ctx, t.GetPublicId(), IdActions).Strings()))
-	}
-
-	item, err := toProto(ctx, t, ts, cl, outputOpts...)
-	if err != nil {
-		return nil, err
-	}
-
-	return &pbs.RemoveTargetCredentialLibrariesResponse{Item: item}, nil
-}
-
 // AddTargetCredentialSources implements the interface pbs.TargetServiceServer.
 func (s Service) AddTargetCredentialSources(ctx context.Context, req *pbs.AddTargetCredentialSourcesRequest) (*pbs.AddTargetCredentialSourcesResponse, error) {
 	const op = "targets.(Service).AddTargetCredentialSources"
@@ -719,7 +500,12 @@ func (s Service) AddTargetCredentialSources(ctx context.Context, req *pbs.AddTar
 	}
 	authResults := s.authResult(ctx, req.GetId(), action.AddCredentialSources)
 	if authResults.Error != nil {
-		return nil, authResults.Error
+		// TODO AddCredentialLibraries was deprecated but grant actions were never migrated
+		// remove this check once actions have been migrated
+		authResults = s.authResult(ctx, req.GetId(), action.AddCredentialLibraries)
+		if authResults.Error != nil {
+			return nil, authResults.Error
+		}
 	}
 	t, ts, cl, err := s.addCredentialSourcesInRepo(ctx, req.GetId(), req.GetApplicationCredentialSourceIds(), req.GetEgressCredentialSourceIds(), req.GetVersion())
 	if err != nil {
@@ -757,7 +543,12 @@ func (s Service) SetTargetCredentialSources(ctx context.Context, req *pbs.SetTar
 	}
 	authResults := s.authResult(ctx, req.GetId(), action.SetCredentialSources)
 	if authResults.Error != nil {
-		return nil, authResults.Error
+		// TODO SetCredentialLibraries was deprecated but grant actions were never migrated
+		// remove this check once actions have been migrated
+		authResults = s.authResult(ctx, req.GetId(), action.SetCredentialLibraries)
+		if authResults.Error != nil {
+			return nil, authResults.Error
+		}
 	}
 	t, ts, cl, err := s.setCredentialSourcesInRepo(ctx, req.GetId(), req.GetApplicationCredentialSourceIds(), req.GetEgressCredentialSourceIds(), req.GetVersion())
 	if err != nil {
@@ -795,7 +586,12 @@ func (s Service) RemoveTargetCredentialSources(ctx context.Context, req *pbs.Rem
 	}
 	authResults := s.authResult(ctx, req.GetId(), action.RemoveCredentialSources)
 	if authResults.Error != nil {
-		return nil, authResults.Error
+		// TODO RemoveCredentialLibraries was deprecated but grant actions were never migrated
+		// remove this check once actions have been migrated
+		authResults = s.authResult(ctx, req.GetId(), action.RemoveCredentialLibraries)
+		if authResults.Error != nil {
+			return nil, authResults.Error
+		}
 	}
 	t, ts, cl, err := s.removeCredentialSourcesInRepo(ctx, req.GetId(), req.GetApplicationCredentialSourceIds(), req.GetEgressCredentialSourceIds(), req.GetVersion())
 	if err != nil {
@@ -980,7 +776,7 @@ func (s Service) AuthorizeSession(ctx context.Context, req *pbs.AuthorizeSession
 		return nil, err
 	}
 
-	var pluginHostSetIds []string
+	var pluginHostSourceIds []string
 	var endpoints []*host.Endpoint
 	for _, hSource := range hostSources {
 		hsId := hSource.Id()
@@ -995,11 +791,11 @@ func (s Service) AuthorizeSession(ctx context.Context, req *pbs.AuthorizeSession
 		default:
 			// Batch the plugin host set ids since each round trip to the plugin
 			// has the potential to be expensive.
-			pluginHostSetIds = append(pluginHostSetIds, hsId)
+			pluginHostSourceIds = append(pluginHostSourceIds, hsId)
 		}
 	}
-	if len(pluginHostSetIds) > 0 {
-		eps, err := pluginHostRepo.Endpoints(ctx, pluginHostSetIds)
+	if len(pluginHostSourceIds) > 0 {
+		eps, err := pluginHostRepo.Endpoints(ctx, pluginHostSourceIds)
 		if err != nil {
 			return nil, err
 		}
@@ -1600,22 +1396,9 @@ func toProto(ctx context.Context, in target.Target, hostSources []target.HostSou
 	if outputFields.Has(globals.AuthorizedActionsField) {
 		out.AuthorizedActions = opts.WithAuthorizedActions
 	}
-	if outputFields.Has(globals.HostSetIdsField) {
-		for _, hs := range hostSources {
-			out.HostSetIds = append(out.HostSetIds, hs.Id())
-		}
-	}
 	if outputFields.Has(globals.HostSourceIdsField) {
 		for _, hs := range hostSources {
 			out.HostSourceIds = append(out.HostSourceIds, hs.Id())
-		}
-	}
-	if outputFields.Has(globals.HostSetsField) {
-		for _, hs := range hostSources {
-			out.HostSets = append(out.HostSets, &pb.HostSet{
-				Id:            hs.Id(),
-				HostCatalogId: hs.HostCatalogId(),
-			})
 		}
 	}
 	if outputFields.Has(globals.HostSourcesField) {
@@ -1629,8 +1412,6 @@ func toProto(ctx context.Context, in target.Target, hostSources []target.HostSou
 
 	var appCredSources, egressCredSources []*pb.CredentialSource
 	var appCredSourceIds, egressCredSourceIds []string
-	var appCredLibraries []*pb.CredentialLibrary
-	var appCredLibIds []string
 
 	for _, cs := range credSources {
 		switch cs.CredentialPurpose() {
@@ -1640,16 +1421,6 @@ func toProto(ctx context.Context, in target.Target, hostSources []target.HostSou
 				Id:                cs.Id(),
 				CredentialStoreId: cs.CredentialStoreId(),
 			})
-
-			// ApplicationCredentialLibrariesField is deprecated and should only be populated
-			// for library type sources
-			if cs.Type() == "library" {
-				appCredLibIds = append(appCredLibIds, cs.Id())
-				appCredLibraries = append(appCredLibraries, &pb.CredentialLibrary{
-					Id:                cs.Id(),
-					CredentialStoreId: cs.CredentialStoreId(),
-				})
-			}
 
 		case credential.EgressPurpose:
 			egressCredSources = append(egressCredSources, &pb.CredentialSource{
@@ -1663,14 +1434,8 @@ func toProto(ctx context.Context, in target.Target, hostSources []target.HostSou
 		}
 	}
 
-	if outputFields.Has(globals.ApplicationCredentialLibraryIdsField) {
-		out.ApplicationCredentialLibraryIds = appCredLibIds
-	}
 	if outputFields.Has(globals.ApplicationCredentialSourceIdsField) {
 		out.ApplicationCredentialSourceIds = appCredSourceIds
-	}
-	if outputFields.Has(globals.ApplicationCredentialLibrariesField) {
-		out.ApplicationCredentialLibraries = appCredLibraries
 	}
 	if outputFields.Has(globals.ApplicationCredentialSourcesField) {
 		out.ApplicationCredentialSources = appCredSources
@@ -1812,75 +1577,6 @@ func validateListRequest(req *pbs.ListTargetsRequest) error {
 	return nil
 }
 
-func validateAddSetsRequest(req *pbs.AddTargetHostSetsRequest) error {
-	badFields := map[string]string{}
-	if !handlers.ValidId(handlers.Id(req.GetId()), target.Prefixes()...) {
-		badFields[globals.IdField] = "Incorrectly formatted identifier."
-	}
-	if req.GetVersion() == 0 {
-		badFields[globals.VersionField] = "Required field."
-	}
-	if len(req.GetHostSetIds()) == 0 {
-		badFields[globals.HostSetIdsField] = "Must be non-empty."
-	}
-	for _, id := range req.GetHostSetIds() {
-		if !handlers.ValidId(handlers.Id(id), static.HostSetPrefix) &&
-			!strings.HasPrefix(id, fmt.Sprintf("%s_", plugin.HostSetPrefix)) {
-			badFields[globals.HostSetIdsField] = fmt.Sprintf("Incorrectly formatted host set identifier %q.", id)
-			break
-		}
-	}
-	if len(badFields) > 0 {
-		return handlers.InvalidArgumentErrorf("Errors in provided fields.", badFields)
-	}
-	return nil
-}
-
-func validateSetSetsRequest(req *pbs.SetTargetHostSetsRequest) error {
-	badFields := map[string]string{}
-	if !handlers.ValidId(handlers.Id(req.GetId()), target.Prefixes()...) {
-		badFields[globals.IdField] = "Incorrectly formatted identifier."
-	}
-	if req.GetVersion() == 0 {
-		badFields[globals.VersionField] = "Required field."
-	}
-	for _, id := range req.GetHostSetIds() {
-		if !handlers.ValidId(handlers.Id(id), static.HostSetPrefix) &&
-			!strings.HasPrefix(id, fmt.Sprintf("%s_", plugin.HostSetPrefix)) {
-			badFields[globals.HostSetIdsField] = fmt.Sprintf("Incorrectly formatted host set identifier %q.", id)
-			break
-		}
-	}
-	if len(badFields) > 0 {
-		return handlers.InvalidArgumentErrorf("Errors in provided fields.", badFields)
-	}
-	return nil
-}
-
-func validateRemoveSetsRequest(req *pbs.RemoveTargetHostSetsRequest) error {
-	badFields := map[string]string{}
-	if !handlers.ValidId(handlers.Id(req.GetId()), target.Prefixes()...) {
-		badFields[globals.IdField] = "Incorrectly formatted identifier."
-	}
-	if req.GetVersion() == 0 {
-		badFields[globals.VersionField] = "Required field."
-	}
-	if len(req.GetHostSetIds()) == 0 {
-		badFields[globals.HostSetIdsField] = "Must be non-empty."
-	}
-	for _, id := range req.GetHostSetIds() {
-		if !handlers.ValidId(handlers.Id(id), static.HostSetPrefix) &&
-			!strings.HasPrefix(id, fmt.Sprintf("%s_", plugin.HostSetPrefix)) {
-			badFields[globals.HostSetIdsField] = fmt.Sprintf("Incorrectly formatted host set identifier %q.", id)
-			break
-		}
-	}
-	if len(badFields) > 0 {
-		return handlers.InvalidArgumentErrorf("Errors in provided fields.", badFields)
-	}
-	return nil
-}
-
 func validateAddHostSourcesRequest(req *pbs.AddTargetHostSourcesRequest) error {
 	badFields := map[string]string{}
 	if !handlers.ValidId(handlers.Id(req.GetId()), target.Prefixes()...) {
@@ -1941,72 +1637,6 @@ func validateRemoveHostSourcesRequest(req *pbs.RemoveTargetHostSourcesRequest) e
 		if !handlers.ValidId(handlers.Id(id), static.HostSetPrefix) &&
 			!strings.HasPrefix(id, fmt.Sprintf("%s_", plugin.HostSetPrefix)) {
 			badFields[globals.HostSourceIdsField] = fmt.Sprintf("Incorrectly formatted host source identifier %q.", id)
-			break
-		}
-	}
-	if len(badFields) > 0 {
-		return handlers.InvalidArgumentErrorf("Errors in provided fields.", badFields)
-	}
-	return nil
-}
-
-func validateAddLibrariesRequest(req *pbs.AddTargetCredentialLibrariesRequest) error {
-	badFields := map[string]string{}
-	if !handlers.ValidId(handlers.Id(req.GetId()), target.Prefixes()...) {
-		badFields[globals.IdField] = "Incorrectly formatted identifier."
-	}
-	if req.GetVersion() == 0 {
-		badFields[globals.VersionField] = "Required field."
-	}
-	if len(req.GetApplicationCredentialLibraryIds()) == 0 {
-		badFields[globals.ApplicationCredentialLibraryIdsField] = "Must be non-empty."
-	}
-	for _, cl := range req.GetApplicationCredentialLibraryIds() {
-		if !handlers.ValidId(handlers.Id(cl), vault.CredentialLibraryPrefix) {
-			badFields[globals.ApplicationCredentialLibraryIdsField] = fmt.Sprintf("Incorrectly formatted credential library identifier %q.", cl)
-			break
-		}
-	}
-	if len(badFields) > 0 {
-		return handlers.InvalidArgumentErrorf("Errors in provided fields.", badFields)
-	}
-	return nil
-}
-
-func validateSetLibrariesRequest(req *pbs.SetTargetCredentialLibrariesRequest) error {
-	badFields := map[string]string{}
-	if !handlers.ValidId(handlers.Id(req.GetId()), target.Prefixes()...) {
-		badFields[globals.IdField] = "Incorrectly formatted identifier."
-	}
-	if req.GetVersion() == 0 {
-		badFields[globals.VersionField] = "Required field."
-	}
-	for _, cl := range req.GetApplicationCredentialLibraryIds() {
-		if !handlers.ValidId(handlers.Id(cl), vault.CredentialLibraryPrefix) {
-			badFields[globals.ApplicationCredentialLibraryIdsField] = fmt.Sprintf("Incorrectly formatted credential library identifier %q.", cl)
-			break
-		}
-	}
-	if len(badFields) > 0 {
-		return handlers.InvalidArgumentErrorf("Errors in provided fields.", badFields)
-	}
-	return nil
-}
-
-func validateRemoveLibrariesRequest(req *pbs.RemoveTargetCredentialLibrariesRequest) error {
-	badFields := map[string]string{}
-	if !handlers.ValidId(handlers.Id(req.GetId()), target.Prefixes()...) {
-		badFields[globals.IdField] = "Incorrectly formatted identifier."
-	}
-	if req.GetVersion() == 0 {
-		badFields[globals.VersionField] = "Required field."
-	}
-	if len(req.GetApplicationCredentialLibraryIds()) == 0 {
-		badFields[globals.ApplicationCredentialLibraryIdsField] = "Must be non-empty."
-	}
-	for _, cl := range req.GetApplicationCredentialLibraryIds() {
-		if !handlers.ValidId(handlers.Id(cl), vault.CredentialLibraryPrefix) {
-			badFields[globals.ApplicationCredentialLibraryIdsField] = fmt.Sprintf("Incorrectly formatted credential library identifier %q.", cl)
 			break
 		}
 	}

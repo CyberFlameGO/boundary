@@ -2892,52 +2892,6 @@
         ]
       }
     },
-    "/v1/targets/{id}:add-credential-libraries": {
-      "post": {
-        "summary": "Deprecated: use AddTargetCredentialSources instead.",
-        "operationId": "TargetService_AddTargetCredentialLibraries",
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/controller.api.resources.targets.v1.Target"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "version": {
-                  "type": "integer",
-                  "format": "int64",
-                  "description": "Version is used to ensure this resource has not changed.\nThe mutation will fail if the version does not match the latest known good version."
-                },
-                "application_credential_library_ids": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          }
-        ],
-        "tags": [
-          "controller.api.services.v1.TargetService"
-        ]
-      }
-    },
     "/v1/targets/{id}:add-credential-sources": {
       "post": {
         "summary": "Adds existing Credential Sources to a Target.",
@@ -2976,52 +2930,6 @@
                   }
                 },
                 "egress_credential_source_ids": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          }
-        ],
-        "tags": [
-          "controller.api.services.v1.TargetService"
-        ]
-      }
-    },
-    "/v1/targets/{id}:add-host-sets": {
-      "post": {
-        "summary": "Adds existing Host Sets to a Target.",
-        "operationId": "TargetService_AddTargetHostSets",
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/controller.api.resources.targets.v1.Target"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "version": {
-                  "type": "integer",
-                  "format": "int64",
-                  "description": "Version is used to ensure this resource has not changed.\nThe mutation will fail if the version does not match the latest known good version."
-                },
-                "host_set_ids": {
                   "type": "array",
                   "items": {
                     "type": "string"
@@ -3134,52 +3042,6 @@
         ]
       }
     },
-    "/v1/targets/{id}:remove-credential-libraries": {
-      "post": {
-        "summary": "Deprecated: use RemoveTargetCredentialSources instead.",
-        "operationId": "TargetService_RemoveTargetCredentialLibraries",
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/controller.api.resources.targets.v1.Target"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "version": {
-                  "type": "integer",
-                  "format": "int64",
-                  "description": "Version is used to ensure this resource has not changed.\nThe mutation will fail if the version does not match the latest known good version."
-                },
-                "application_credential_library_ids": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          }
-        ],
-        "tags": [
-          "controller.api.services.v1.TargetService"
-        ]
-      }
-    },
     "/v1/targets/{id}:remove-credential-sources": {
       "post": {
         "summary": "Removes Credential Sources from the Target.",
@@ -3218,52 +3080,6 @@
                   }
                 },
                 "egress_credential_source_ids": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          }
-        ],
-        "tags": [
-          "controller.api.services.v1.TargetService"
-        ]
-      }
-    },
-    "/v1/targets/{id}:remove-host-sets": {
-      "post": {
-        "summary": "Removes Host Sets from the Target.",
-        "operationId": "TargetService_RemoveTargetHostSets",
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/controller.api.resources.targets.v1.Target"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "version": {
-                  "type": "integer",
-                  "format": "int64",
-                  "description": "Version is used to ensure this resource has not changed.\nThe mutation will fail if the version does not match the latest known good version."
-                },
-                "host_set_ids": {
                   "type": "array",
                   "items": {
                     "type": "string"
@@ -3324,53 +3140,6 @@
         ]
       }
     },
-    "/v1/targets/{id}:set-credential-libraries": {
-      "post": {
-        "summary": "Deprecated: use SetTargetCredentialSources instead.",
-        "operationId": "TargetService_SetTargetCredentialLibraries",
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/controller.api.resources.targets.v1.Target"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "version": {
-                  "type": "integer",
-                  "format": "int64",
-                  "description": "Version is used to ensure this resource has not changed.\nThe mutation will fail if the version does not match the latest known good version."
-                },
-                "application_credential_library_ids": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                }
-              },
-              "description": "Sets the values for application_credential_library_ids.  If any\ncredential_library_id field that is not set in the request will result in\nthose fields being cleared."
-            }
-          }
-        ],
-        "tags": [
-          "controller.api.services.v1.TargetService"
-        ]
-      }
-    },
     "/v1/targets/{id}:set-credential-sources": {
       "post": {
         "summary": "Sets the Credential Sources on the Target.",
@@ -3416,52 +3185,6 @@
                 }
               },
               "description": "Sets the values for credential sources. Any credential_source_id field that\nis not set in the request will result in those fields being cleared."
-            }
-          }
-        ],
-        "tags": [
-          "controller.api.services.v1.TargetService"
-        ]
-      }
-    },
-    "/v1/targets/{id}:set-host-sets": {
-      "post": {
-        "summary": "Sets the Host Sets on the Target.",
-        "operationId": "TargetService_SetTargetHostSets",
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/controller.api.resources.targets.v1.Target"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "version": {
-                  "type": "integer",
-                  "format": "int64",
-                  "description": "Version is used to ensure this resource has not changed.\nThe mutation will fail if the version does not match the latest known good version."
-                },
-                "host_set_ids": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                }
-              }
             }
           }
         ],
@@ -5116,35 +4839,6 @@
         }
       }
     },
-    "controller.api.resources.targets.v1.CredentialLibrary": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "The ID of the Credential Library."
-        },
-        "name": {
-          "type": "string",
-          "description": "Output only.  The name of the Credential Library.",
-          "readOnly": true
-        },
-        "description": {
-          "type": "string",
-          "description": "Output only. The description of the Credential Library.",
-          "readOnly": true
-        },
-        "credential_store_id": {
-          "type": "string",
-          "description": "Output only. The Credential Store to which this Credential Library belongs.",
-          "readOnly": true
-        },
-        "type": {
-          "type": "string",
-          "description": "Output only. The type of the credential library.",
-          "readOnly": true
-        }
-      }
-    },
     "controller.api.resources.targets.v1.CredentialSource": {
       "type": "object",
       "properties": {
@@ -5175,21 +4869,6 @@
         "credential_type": {
           "type": "string",
           "description": "Output only. The type of the credential, empty if unspecified.",
-          "readOnly": true
-        }
-      }
-    },
-    "controller.api.resources.targets.v1.HostSet": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Output only. The ID of the Host Set.",
-          "readOnly": true
-        },
-        "host_catalog_id": {
-          "type": "string",
-          "description": "Output only. The Host Catalog to which this Host Set belongs.",
           "readOnly": true
         }
       }
@@ -5282,11 +4961,6 @@
           "description": "Output only. The credential source information.",
           "readOnly": true
         },
-        "credential_library": {
-          "$ref": "#/definitions/controller.api.resources.targets.v1.CredentialLibrary",
-          "description": "Output only. The library which generated this credential. Deprecated: use credential_source instead.",
-          "readOnly": true
-        },
         "secret": {
           "$ref": "#/definitions/controller.api.resources.targets.v1.SessionSecret",
           "description": "Output only. The secret of this credential base64 encoded.",
@@ -5362,22 +5036,6 @@
           "type": "string",
           "description": "The type of the Target."
         },
-        "host_set_ids": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "description": "Output only. The IDs of the Host Sets associated with this Target.",
-          "readOnly": true
-        },
-        "host_sets": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/controller.api.resources.targets.v1.HostSet"
-          },
-          "description": "Output only. The Host Sets associated with this Target.",
-          "readOnly": true
-        },
         "host_source_ids": {
           "type": "array",
           "items": {
@@ -5407,22 +5065,6 @@
         "worker_filter": {
           "type": "string",
           "description": "Optional boolean expression to filter the workers that are allowed to satisfy this request."
-        },
-        "application_credential_library_ids": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "description": "Output only. The IDs of the application credential library ids associated with this Target. Deprecated: use application_credential_source_ids instead.",
-          "readOnly": true
-        },
-        "application_credential_libraries": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/controller.api.resources.targets.v1.CredentialLibrary"
-          },
-          "description": "Output only. The application credential libraries associated with this Target. Deprecated: use application_credential_sources instead.",
-          "readOnly": true
         },
         "application_credential_source_ids": {
           "type": "array",
@@ -5607,23 +5249,7 @@
         }
       }
     },
-    "controller.api.services.v1.AddTargetCredentialLibrariesResponse": {
-      "type": "object",
-      "properties": {
-        "item": {
-          "$ref": "#/definitions/controller.api.resources.targets.v1.Target"
-        }
-      }
-    },
     "controller.api.services.v1.AddTargetCredentialSourcesResponse": {
-      "type": "object",
-      "properties": {
-        "item": {
-          "$ref": "#/definitions/controller.api.resources.targets.v1.Target"
-        }
-      }
-    },
-    "controller.api.services.v1.AddTargetHostSetsResponse": {
       "type": "object",
       "properties": {
         "item": {
@@ -6231,23 +5857,7 @@
         }
       }
     },
-    "controller.api.services.v1.RemoveTargetCredentialLibrariesResponse": {
-      "type": "object",
-      "properties": {
-        "item": {
-          "$ref": "#/definitions/controller.api.resources.targets.v1.Target"
-        }
-      }
-    },
     "controller.api.services.v1.RemoveTargetCredentialSourcesResponse": {
-      "type": "object",
-      "properties": {
-        "item": {
-          "$ref": "#/definitions/controller.api.resources.targets.v1.Target"
-        }
-      }
-    },
-    "controller.api.services.v1.RemoveTargetHostSetsResponse": {
       "type": "object",
       "properties": {
         "item": {
@@ -6311,23 +5921,7 @@
         }
       }
     },
-    "controller.api.services.v1.SetTargetCredentialLibrariesResponse": {
-      "type": "object",
-      "properties": {
-        "item": {
-          "$ref": "#/definitions/controller.api.resources.targets.v1.Target"
-        }
-      }
-    },
     "controller.api.services.v1.SetTargetCredentialSourcesResponse": {
-      "type": "object",
-      "properties": {
-        "item": {
-          "$ref": "#/definitions/controller.api.resources.targets.v1.Target"
-        }
-      }
-    },
-    "controller.api.services.v1.SetTargetHostSetsResponse": {
       "type": "object",
       "properties": {
         "item": {

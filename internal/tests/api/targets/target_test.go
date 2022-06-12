@@ -24,7 +24,7 @@ import (
 	_ "github.com/hashicorp/boundary/internal/daemon/controller/handlers/targets/tcp"
 )
 
-func TestHostSetASD(t *testing.T) {
+func TestHostSourceASD(t *testing.T) {
 	assert, require := assert.New(t), require.New(t)
 	tc := controller.NewTestController(t, nil)
 	defer tc.Shutdown()
@@ -49,22 +49,22 @@ func TestHostSetASD(t *testing.T) {
 	tar, err := tarClient.Create(tc.Context(), "tcp", proj.GetPublicId(), targets.WithName("foo"))
 	require.NoError(err)
 	require.NotNil(tar)
-	assert.Empty(tar.Item.HostSetIds)
+	assert.Empty(tar.Item.HostSourceIds)
 
-	tar, err = tarClient.AddHostSets(tc.Context(), tar.Item.Id, tar.Item.Version, []string{hSet.Item.Id})
+	tar, err = tarClient.AddHostSources(tc.Context(), tar.Item.Id, tar.Item.Version, []string{hSet.Item.Id})
 	require.NoError(err)
 	require.NotNil(tar)
-	assert.ElementsMatch(tar.Item.HostSetIds, []string{hSet.Item.Id})
+	assert.ElementsMatch(tar.Item.HostSourceIds, []string{hSet.Item.Id})
 
-	tar, err = tarClient.SetHostSets(tc.Context(), tar.Item.Id, tar.Item.Version, []string{hSet2.Item.Id})
+	tar, err = tarClient.SetHostSources(tc.Context(), tar.Item.Id, tar.Item.Version, []string{hSet2.Item.Id})
 	require.NoError(err)
 	require.NotNil(tar)
-	assert.ElementsMatch(tar.Item.HostSetIds, []string{hSet2.Item.Id})
+	assert.ElementsMatch(tar.Item.HostSourceIds, []string{hSet2.Item.Id})
 
-	tar, err = tarClient.RemoveHostSets(tc.Context(), tar.Item.Id, tar.Item.Version, []string{hSet2.Item.Id})
+	tar, err = tarClient.RemoveHostSources(tc.Context(), tar.Item.Id, tar.Item.Version, []string{hSet2.Item.Id})
 	require.NoError(err)
 	require.NotNil(tar)
-	assert.Empty(tar.Item.HostSetIds)
+	assert.Empty(tar.Item.HostSourceIds)
 }
 
 func TestCredentialSourcesASD(t *testing.T) {

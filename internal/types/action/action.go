@@ -132,9 +132,9 @@ func (a Type) String() string {
 		"add-hosts",
 		"set-hosts",
 		"remove-hosts",
-		"add-host-sets",
-		"set-host-sets",
-		"remove-host-sets",
+		"add-host-sets",    // DEPRECATED
+		"set-host-sets",    // DEPRECATED
+		"remove-host-sets", // DEPRECATED
 		"cancel",
 		"add-accounts",
 		"set-accounts",
@@ -144,9 +144,9 @@ func (a Type) String() string {
 		"change-state",
 		"delete:self",
 		"no-op",
-		"add-credential-libraries",
-		"set-credential-libraries",
-		"remove-credential-libraries",
+		"add-credential-libraries",    // DEPRECATED
+		"set-credential-libraries",    // DEPRECATED
+		"remove-credential-libraries", // DEPRECATED
 		"add-credential-sources",
 		"set-credential-sources",
 		"remove-credential-sources",
